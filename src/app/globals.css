@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom text utilities with automatic dark mode support */
+@layer utilities {
+  .text-muted {
+    @apply text-gray-600 dark:text-gray-300;
+  }
+  
+  .text-muted-foreground {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+  
+  .text-danger {
+    @apply text-red-600 dark:text-red-400;
+  }
+  
+  .text-success {
+    @apply text-green-600 dark:text-green-400;
+  }
+  
+  .text-warning {
+    @apply text-yellow-600 dark:text-yellow-400;
+  }
+  
+  .text-info {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+}
+
+/* Custom background utilities with automatic dark mode support */
+@layer utilities {
+  .bg-muted {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  
+  .bg-card {
+    @apply bg-white dark:bg-gray-800;
+  }
+  
+  .border-muted {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+}
