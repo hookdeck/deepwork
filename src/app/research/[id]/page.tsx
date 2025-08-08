@@ -24,7 +24,7 @@ export default function ResearchDetailPage() {
     session ? `/api/researches/${researchId}` : null,
     fetcher,
     {
-      refreshInterval: 5000, // Poll every 5 seconds
+      refreshInterval: (data) => (data?.status === 'completed' || data?.status === 'failed' || data?.status === 'cancelled' || data?.status === 'incomplete' ? 0 : 10000),
       revalidateOnFocus: true,
     }
   );
@@ -34,10 +34,11 @@ export default function ResearchDetailPage() {
     session ? `/api/researches/${researchId}/events` : null,
     fetcher,
     {
-      refreshInterval: 5000, // Poll every 5 seconds
+      refreshInterval: (data) => (research?.status === 'completed' || research?.status === 'failed' || research?.status === 'cancelled' || research?.status === 'incomplete' ? 0 : 10000),
       revalidateOnFocus: true,
     }
   );
+
 
   const handleDownload = () => {
     if (!research || !eventsData) return;
@@ -103,7 +104,9 @@ export default function ResearchDetailPage() {
       completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
       failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-      pending: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+      pending: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+      cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+      incomplete: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
     };
 
     return (
@@ -194,7 +197,7 @@ export default function ResearchDetailPage() {
       </section>
 
       {/* Results Section */}
-      {research?.status === 'completed' && research.result && (
+      {research?.result && (
         <section className="mb-8">
           <ResearchResults data={research.result} />
         </section>

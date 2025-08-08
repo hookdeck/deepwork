@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
         input: body.question,
         tools: [
           { type: 'web_search_preview' },
-          { type: 'code_interpreter', container: { type: 'auto' } }
         ],
         metadata: {
           researchId: research.id

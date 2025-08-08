@@ -14,7 +14,7 @@ export async function getCorrelatedEvents(researchId: string): Promise<EventTime
   try {
     const response = await fetch(
       `${HOOKDECK_API_URL}/events?` + new URLSearchParams({
-        'body_json.research_id': researchId,
+        'search_term': researchId,
         'order_by': 'created_at',
         'dir': 'asc'
       }),
@@ -33,18 +33,28 @@ export async function getCorrelatedEvents(researchId: string): Promise<EventTime
     const events = data.models || [];
 
     // Separate and correlate outbound/inbound
-    const timeline: EventTimeline[] = events
-      .sort((a: HookdeckEvent, b: HookdeckEvent) => 
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      )
-      .map((event: HookdeckEvent) => ({
+    const timeline: EventTimeline[] = await Promise.all(events.map(async (event: any) => {
+      const [sourceRes, connectionRes] = await Promise.all([
+        fetch(`${HOOKDECK_API_URL}/sources/${event.source_id}`, {
+          headers: { 'Authorization': `Bearer ${process.env.HOOKDECK_API_KEY}` }
+        }),
+        fetch(`${HOOKDECK_API_URL}/connections/${event.webhook_id}`, {
+          headers: { 'Authorization': `Bearer ${process.env.HOOKDECK_API_KEY}` }
+        })
+      ]);
+
+      const source = await sourceRes.json();
+      const connection = await connectionRes.json();
+
+      return {
         id: event.id,
-        type: event.source.name === 'deepqueue-source' ? 'outbound' : 'inbound',
-        connection: event.connection.name,
+        type: source.name === 'deepqueue-source' ? 'outbound' : 'inbound',
+        connection: connection.name,
         status: event.status,
         timestamp: event.created_at,
         data: event.data
-      }));
+      };
+    }));
 
     return timeline;
   } catch (error) {
