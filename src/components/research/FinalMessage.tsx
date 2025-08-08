@@ -2,6 +2,8 @@
 
 import React from "react";
 import { MessageOutput, Annotation } from "@/types/deep-research";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import CitationList from "./CitationList";
 
 interface FinalMessageProps {
@@ -34,53 +36,9 @@ function ConfidencePill({ score }: { score?: number }) {
   );
 }
 
-function parseMarkdownText(text: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  let keyCounter = 0;
-
-  // Process bold text (**text**)
-  const boldRegex = /\*\*(.*?)\*\*/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = boldRegex.exec(text)) !== null) {
-    // Add text before bold
-    if (match.index > lastIndex) {
-      const beforeText = text.slice(lastIndex, match.index);
-      parts.push(beforeText);
-    }
-
-    // Add bold text
-    parts.push(
-      <strong key={`bold-${keyCounter++}`} className="font-semibold">
-        {match[1]}
-      </strong>
-    );
-
-    lastIndex = match.index + match[0].length;
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
-  return parts;
-}
-
 function renderTextWithAnnotations(text: string, annotations: Annotation[]) {
   if (!annotations || annotations.length === 0) {
-    // Parse markdown and split into paragraphs for better formatting
-    const paragraphs = text.split("\n\n");
-    return (
-      <div className="space-y-4">
-        {paragraphs.map((paragraph, i) => (
-          <p key={i} className="leading-relaxed">
-            {parseMarkdownText(paragraph)}
-          </p>
-        ))}
-      </div>
-    );
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>;
   }
 
   // Sort annotations by start_index
@@ -88,71 +46,72 @@ function renderTextWithAnnotations(text: string, annotations: Annotation[]) {
     (a, b) => a.start_index - b.start_index
   );
 
-  const parts: React.ReactNode[] = [];
+  const parts: string[] = [];
   let lastIndex = 0;
 
   sortedAnnotations.forEach((annotation, i) => {
-    // Add text before annotation (with markdown parsing)
+    // Add text before annotation
     if (annotation.start_index > lastIndex) {
-      const beforeText = text.slice(lastIndex, annotation.start_index);
-      parts.push(...parseMarkdownText(beforeText));
+      parts.push(text.slice(lastIndex, annotation.start_index));
     }
 
-    // Add numbered reference instead of inline link
+    // Add a placeholder for the reference
     const referenceNumber = i + 1;
-
-    parts.push(
-      <a
-        key={`ref-${i}`}
-        href={`#ref-${referenceNumber}`}
-        className="text-blue-600 dark:text-blue-400 font-medium no-underline hover:underline"
-        title={`Reference ${referenceNumber}: ${annotation.title}`}
-      >
-        [{referenceNumber}]
-      </a>
-    );
+    parts.push(`[${referenceNumber}](#ref-${referenceNumber})`);
 
     lastIndex = annotation.end_index;
   });
 
-  // Add remaining text (with markdown parsing)
+  // Add remaining text
   if (lastIndex < text.length) {
-    const remainingText = text.slice(lastIndex);
-    parts.push(...parseMarkdownText(remainingText));
+    parts.push(text.slice(lastIndex));
   }
 
-  // Split content into paragraphs for better formatting
-  const paragraphs: React.ReactNode[][] = [[]];
-  let currentParagraph = 0;
-
-  parts.forEach((part) => {
-    if (typeof part === "string" && part.includes("\n\n")) {
-      // Split on double newlines
-      const segments = part.split("\n\n");
-      segments.forEach((segment, index) => {
-        if (segment.trim()) {
-          paragraphs[currentParagraph].push(segment);
-        }
-        if (index < segments.length - 1) {
-          currentParagraph++;
-          paragraphs[currentParagraph] = [];
-        }
-      });
-    } else {
-      paragraphs[currentParagraph].push(part);
-    }
-  });
+  const combinedText = parts.join("");
 
   return (
-    <div className="space-y-4">
-      {paragraphs
-        .filter((p) => p.length > 0)
-        .map((paragraph, i) => (
-          <p key={i} className="leading-relaxed">
-            {paragraph}
-          </p>
-        ))}
-    </div>
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ node, ...props }) => (
+          <h3 className="text-xl font-bold mt-6 mb-2" {...props} />
+        ),
+        h2: ({ node, ...props }) => (
+          <h4 className="text-lg font-bold mt-4 mb-2" {...props} />
+        ),
+        h3: ({ node, ...props }) => (
+          <h5 className="text-md font-bold mt-2 mb-2" {...props} />
+        ),
+        h4: ({ node, ...props }) => (
+          <h6 className="text-sm font-bold mt-2 mb-2" {...props} />
+        ),
+        p: ({ node, ...props }) => <p {...props} className="mb-4" />,
+        a: ({ node, ...props }) => {
+          const href = props.href || "";
+          // Check if it's a reference link
+          if (href.startsWith("#ref-")) {
+            const refNum = parseInt(href.replace("#ref-", ""), 10);
+            const annotation = sortedAnnotations[refNum - 1];
+            if (annotation) {
+              return (
+                <a
+                  {...props}
+                  href={`#ref-${refNum}`}
+                  title={`Reference ${refNum}: ${annotation.title}`}
+                  className="text-blue-600 dark:text-blue-400 font-medium no-underline hover:underline"
+                >
+                  [{props.children}]
+                </a>
+              );
+            }
+          }
+          // It's a regular link from the markdown
+          return <a {...props} target="_blank" rel="noopener noreferrer" />;
+        },
+      }}
+    >
+      {combinedText}
+    </ReactMarkdown>
   );
 }
 

@@ -6,6 +6,86 @@ interface ResearchCardProps {
   research: Research;
 }
 
+function getSummary(result: string | undefined): string {
+  if (!result) return "No result available.";
+  try {
+    const parsed = JSON.parse(result);
+    // Attempt to find a summary or title in the result object
+    const summary = parsed.summary || parsed.title || parsed.answer;
+    if (typeof summary === "string") {
+      return summary;
+    }
+    // Fallback for nested structures
+    if (parsed.data && (parsed.data.summary || parsed.data.title)) {
+      return parsed.data.summary || parsed.data.title;
+    }
+    // Generic fallback: find the first string value in the object
+    const firstString = findFirstString(parsed);
+    if (firstString) {
+      return firstString;
+    }
+    return "Result available. Click to view details.";
+  } catch (error) {
+    // If parsing fails, it might be a simple string result
+    if (typeof result === "string") {
+      return result;
+    }
+    return "Could not parse research result.";
+  }
+}
+
+function findFirstString(obj: any): string | null {
+  if (!obj || typeof obj !== "object") {
+    return null;
+  }
+
+  let bestCandidate: string | null = null;
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+
+      if (typeof value === "string") {
+        // Exclude common ID-like patterns and short, non-descriptive strings
+        if (
+          value.length > 25 &&
+          !key.toLowerCase().includes("id") &&
+          !value.startsWith("resp_")
+        ) {
+          // Prioritize longer strings as they are more likely to be descriptive content
+          if (!bestCandidate || value.length > bestCandidate.length) {
+            bestCandidate = value;
+          }
+        }
+      } else if (typeof value === "object") {
+        const nestedCandidate = findFirstString(value);
+        if (
+          nestedCandidate &&
+          (!bestCandidate || nestedCandidate.length > bestCandidate.length)
+        ) {
+          bestCandidate = nestedCandidate;
+        }
+      }
+    }
+  }
+
+  if (bestCandidate) {
+    // Strip leading markdown header line
+    const trimmed = bestCandidate.trim();
+    if (trimmed.startsWith("#")) {
+      const newlineIndex = trimmed.indexOf("\n");
+      if (newlineIndex !== -1) {
+        return trimmed.substring(newlineIndex + 1).trim();
+      }
+      // It's a header with no content after it, return empty
+      return "";
+    }
+    return trimmed;
+  }
+
+  return null;
+}
+
 export default function ResearchCard({ research }: ResearchCardProps) {
   const getStatusColor = (status: Research["status"]) => {
     switch (status) {
@@ -52,9 +132,9 @@ export default function ResearchCard({ research }: ResearchCardProps) {
             )}
         </div>
 
-        {research.status === "completed" && research.result && (
+        {research.status === "completed" && (
           <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-            {research.result}
+            {getSummary(research.result)}
           </p>
         )}
 
