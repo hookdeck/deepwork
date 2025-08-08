@@ -3,8 +3,7 @@
  */
 export interface EventTimeline {
   id: string;
-  type: 'outbound' | 'inbound';
-  connection: string;
+  type: "outbound" | "inbound";
   status: string;
   timestamp: string;
   data: any;
@@ -35,24 +34,24 @@ export interface HookdeckEvent {
 /**
  * Event formatting utilities
  */
-export const formatEventType = (type: 'outbound' | 'inbound'): string => {
-  return type === 'outbound' ? 'Sent to OpenAI' : 'Received from OpenAI';
+export const formatEventType = (type: "outbound" | "inbound"): string => {
+  return type === "outbound" ? "Sent to OpenAI" : "Received from OpenAI";
 };
 
 export const formatEventStatus = (status: string): string => {
   const statusMap: Record<string, string> = {
-    'SUCCESS': 'Success',
-    'FAILED': 'Failed',
-    'PENDING': 'Pending',
-    'RETRY': 'Retrying'
+    SUCCESS: "Success",
+    FAILED: "Failed",
+    PENDING: "Pending",
+    RETRY: "Retrying",
   };
   return statusMap[status] || status;
 };
 
 export const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    dateStyle: 'short',
-    timeStyle: 'medium'
+  return date.toLocaleString("en-US", {
+    dateStyle: "short",
+    timeStyle: "medium",
   });
 };
