@@ -68,10 +68,10 @@ export default function TimelineEvent({ event }: TimelineEventProps) {
   };
 
   return (
-    <div className="flex gap-4 ml-6">
+    <div className="flex items-start gap-4 pl-12">
       {/* Icon */}
       <div
-        className={`relative -left-[1.625rem] flex items-center justify-center w-10 h-10 rounded-full ${getEventColor()} shadow-sm`}
+        className={`absolute -left-3 flex items-center justify-center w-10 h-10 rounded-full ${getEventColor()} shadow-sm`}
       >
         {getEventIcon()}
       </div>

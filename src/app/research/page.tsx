@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { formatTimestamp } from "@/lib/utils/timestamp";
 
 interface Research {
   id: string;
@@ -17,14 +18,14 @@ interface Research {
 export default function TestResearchPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState("");
   const [researches, setResearches] = useState<Research[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (status === "unauthenticated") {
+      router.push("/login");
     }
   }, [status, router]);
 
@@ -36,12 +37,12 @@ export default function TestResearchPage() {
 
   const fetchResearches = async () => {
     try {
-      const response = await fetch('/api/researches');
-      if (!response.ok) throw new Error('Failed to fetch researches');
+      const response = await fetch("/api/researches");
+      if (!response.ok) throw new Error("Failed to fetch researches");
       const data = await response.json();
       setResearches(data.researches || []);
     } catch (err) {
-      console.error('Error fetching researches:', err);
+      console.error("Error fetching researches:", err);
     }
   };
 
@@ -50,34 +51,32 @@ export default function TestResearchPage() {
     if (!question.trim()) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/researches', {
-        method: 'POST',
+      const response = await fetch("/api/researches", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ question }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit research');
+        throw new Error("Failed to submit research");
       }
 
       const newResearch = await response.json();
       setResearches([newResearch, ...researches]);
-      setQuestion('');
-      
+      setQuestion("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-
-  if (status === 'loading') {
+  if (status === "loading") {
     return <div>Loading...</div>;
   }
 
@@ -88,7 +87,7 @@ export default function TestResearchPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Test Research Workflow</h1>
-      
+
       <form onSubmit={submitResearch} className="mb-8">
         <div className="flex gap-2">
           <input
@@ -104,12 +103,10 @@ export default function TestResearchPage() {
             disabled={loading || !question.trim()}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
           >
-            {loading ? 'Submitting...' : 'Submit'}
+            {loading ? "Submitting..." : "Submit"}
           </button>
         </div>
-        {error && (
-          <p className="text-red-500 mt-2">{error}</p>
-        )}
+        {error && <p className="text-red-500 mt-2">{error}</p>}
       </form>
 
       <div className="space-y-4">
@@ -118,15 +115,23 @@ export default function TestResearchPage() {
           <p className="text-muted-foreground">No research questions yet.</p>
         ) : (
           researches.map((research) => (
-            <div key={research.id} className="border rounded-lg p-4 bg-card border-muted">
+            <div
+              key={research.id}
+              className="border rounded-lg p-4 bg-card border-muted"
+            >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-medium">{research.question}</h3>
-                <span className={`px-2 py-1 text-sm rounded ${
-                  research.status === 'completed' ? 'bg-green-100 text-green-800' :
-                  research.status === 'failed' ? 'bg-red-100 text-red-800' :
-                  research.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`px-2 py-1 text-sm rounded ${
+                    research.status === "completed"
+                      ? "bg-green-100 text-green-800"
+                      : research.status === "failed"
+                      ? "bg-red-100 text-red-800"
+                      : research.status === "processing"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
                   {research.status}
                 </span>
               </div>
@@ -142,7 +147,7 @@ export default function TestResearchPage() {
                 <p className="text-danger mt-2">Error: {research.error}</p>
               )}
               <p className="text-sm text-muted-foreground mt-2">
-                Created: {new Date(research.createdAt).toLocaleString()}
+                Created: {formatTimestamp(research.createdAt)}
               </p>
             </div>
           ))
@@ -152,9 +157,9 @@ export default function TestResearchPage() {
       <div className="mt-8 p-4 bg-muted rounded-lg">
         <h3 className="font-semibold mb-2">Note:</h3>
         <p className="text-sm text-muted">
-          This is a test page for the research workflow. In production, the OpenAI 
-          responses would be processed through Hookdeck webhooks. Here, we're simulating 
-          the webhook response 2 seconds after submission.
+          This is a test page for the research workflow. In production, the
+          OpenAI responses would be processed through Hookdeck webhooks. Here,
+          we're simulating the webhook response 2 seconds after submission.
         </p>
       </div>
     </div>

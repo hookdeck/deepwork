@@ -51,7 +51,11 @@ export const formatEventStatus = (status: string): string => {
 export const formatTimestamp = (timestamp: string): string => {
   const date = new Date(timestamp);
   return date.toLocaleString("en-US", {
-    dateStyle: "short",
-    timeStyle: "medium",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false, // Force 24-hour format
   });
 };
