@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyWebhookSignature } from '@/lib/hookdeck/verify';
 import { researchStorage } from '@/lib/storage/research';
-import { OpenAIWebhookPayload } from '@/types/research';
+
+const DEBUG = process.env.DEBUG === 'true';
 
 // POST /api/webhooks/openai - Handle OpenAI webhook events
 export async function POST(request: NextRequest) {
@@ -9,110 +10,122 @@ export async function POST(request: NextRequest) {
     // Get raw body for signature verification
     const rawBody = await request.text();
     
+    if (DEBUG) {
+      console.log('[Webhook] Received webhook request');
+      console.log('[Webhook] Headers:', Object.fromEntries(request.headers.entries()));
+    }
+    
     // Verify webhook signature
     const signature = request.headers.get('x-hookdeck-signature');
-    const webhookId = request.headers.get('x-hookdeck-webhook-id');
-    
-    if (!signature || !webhookId) {
-      console.error('Missing webhook headers');
+    const signature2 = request.headers.get('x-hookdeck-signature-2');
+    const signatures = [signature, signature2].filter(Boolean) as string[];
+    if (!signatures.length) {
+      console.error('[Webhook] Missing webhook signature');
       return NextResponse.json(
-        { error: 'Missing webhook headers' },
-        { status: 400 }
+        { error: 'Missing webhook signature' },
+        { status: 401 }
       );
     }
 
-    // Verify the webhook
     const signingSecret = process.env.HOOKDECK_SIGNING_SECRET;
     if (!signingSecret) {
-      console.error('HOOKDECK_SIGNING_SECRET not configured');
-      // In development, we might want to skip verification
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json(
-          { error: 'Webhook verification not configured' },
-          { status: 500 }
-        );
-      }
-    } else {
-      const isValid = await verifyWebhookSignature(
-        rawBody,
-        signature,
-        signingSecret
+      console.error('[Webhook] HOOKDECK_SIGNING_SECRET not configured');
+      return NextResponse.json(
+        { error: 'Webhook verification not configured' },
+        { status: 500 }
       );
+    }
 
-      if (!isValid) {
-        console.error('Invalid webhook signature');
-        return NextResponse.json(
-          { error: 'Invalid webhook signature' },
-          { status: 401 }
-        );
-      }
+    const isValid = verifyWebhookSignature(
+      rawBody,
+      signatures,
+      signingSecret
+    );
+
+    if (!isValid) {
+      console.error('[Webhook] Invalid webhook signature');
+      return NextResponse.json(
+        { error: 'Invalid webhook signature' },
+        { status: 401 }
+      );
     }
 
     // Parse the webhook payload
     const payload = JSON.parse(rawBody);
     
-    // Extract research ID from metadata or custom field
-    // This would depend on how OpenAI sends back our metadata
-    let researchId: string | undefined;
-    
-    // Try to get research ID from different possible locations
-    if (payload.metadata?.researchId) {
-      researchId = payload.metadata.researchId;
-    } else if (payload.custom?.researchId) {
-      researchId = payload.custom.researchId;
-    } else if (payload.researchId) {
-      researchId = payload.researchId;
+    // Retrieve the response from OpenAI to get the metadata
+    const responseResponse = await fetch(`https://api.openai.com/v1/responses/${payload.data.id}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      }
+    });
+    const response = await responseResponse.json();
+    if (DEBUG) {
+      console.log('[Webhook] OpenAI Response:', response);
     }
+    const researchId = response.metadata?.researchId as string | undefined;
 
     if (!researchId) {
-      console.error('No research ID found in webhook payload');
+      console.error('[Webhook] No research ID found in webhook payload', payload);
       return NextResponse.json(
         { error: 'No research ID in payload' },
         { status: 400 }
       );
     }
 
+    if (DEBUG) {
+      console.log('[Webhook] Processing webhook for research:', researchId);
+      console.log('[Webhook] Payload type:', payload.type || 'unknown');
+    }
+
     // Process based on webhook type
-    // For now, we'll assume it's a completion response
-    if (payload.object === 'chat.completion' || payload.choices) {
-      const openaiPayload = payload as OpenAIWebhookPayload;
-      
-      // Extract the response content
-      const responseContent = openaiPayload.choices?.[0]?.message?.content || '';
-      
+    if (payload.type === 'response.completed') {
       // Update research record
-      const updated = await researchStorage.update(researchId, {
+      await researchStorage.update(researchId, {
         status: 'completed',
-        result: responseContent,
-        openaiRequestId: openaiPayload.id
+        result: JSON.stringify(response, null, 2),
+        openaiRequestId: response.id
       });
 
-      if (!updated) {
-        console.error(`Research ${researchId} not found`);
-        return NextResponse.json(
-          { error: 'Research not found' },
-          { status: 404 }
-        );
-      }
-
-      console.log(`Research ${researchId} completed successfully`);
-    } else if (payload.error) {
+      console.log(`[Webhook] Research ${researchId} completed successfully`);
+    } else if (payload.type === 'response.failed') {
       // Handle error case
       await researchStorage.update(researchId, {
         status: 'failed',
-        error: payload.error.message || 'Unknown error'
+        error: response.error?.message || 'Response failed',
+        result: JSON.stringify(response, null, 2)
       });
       
-      console.error(`Research ${researchId} failed:`, payload.error);
+      console.error(`[Webhook] Research ${researchId} failed:`, payload);
+    } else if (payload.type === 'response.cancelled') {
+      await researchStorage.update(researchId, {
+        status: 'cancelled',
+        error: 'Response cancelled'
+      });
+      console.log(`[Webhook] Research ${researchId} cancelled`);
+    } else if (payload.type === 'response.incomplete') {
+      await researchStorage.update(researchId, {
+        status: 'incomplete',
+        error: 'Response incomplete'
+      });
+      console.log(`[Webhook] Research ${researchId} incomplete`);
+    } else {
+      console.warn(`[Webhook] Unknown payload type for research ${researchId}:`, payload);
     }
 
     // Return success response
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: 'Webhook processed successfully'
+    });
 
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('[Webhook] Error processing webhook:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: DEBUG ? (error instanceof Error ? error.message : 'Unknown error') : undefined
+      },
       { status: 500 }
     );
   }

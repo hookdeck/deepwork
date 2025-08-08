@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup:dev": "ts-node scripts/setup-dev.ts",
+    "hookdeck": "hookdeck",
+    "hookdeck:login": "hookdeck login",
+    "hookdeck:listen": "hookdeck listen 3000 openai-webhook --path /api/webhooks/openai",
+    "dev:hookdeck": "curl -X GET http://localhost:3000/api/test/hookdeck-init",
+    "dev:workflow": "curl -X GET http://localhost:3000/api/test/research-workflow"
   },
   "dependencies": {
     "@hookdeck/sdk": "^0.4.0",
@@ -22,6 +28,8 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "hookdeck-cli": "^1.0",
+    "ts-node": "^10.9.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

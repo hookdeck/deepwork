@@ -20,7 +20,7 @@ export default withAuth(
 export const config = {
   matcher: [
     // Protect dashboard (root)
-    "/((?!login|about|api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|about|api/auth|api/webhooks|_next/static|_next/image|favicon.ico).*)",
     // Protect research detail pages
     "/research/:path*",
   ],

@@ -9,12 +9,14 @@ import crypto from 'crypto';
  */
 export function verifyWebhookSignature(
   payload: string,
-  signature: string,
+  signature: string | string[],
   secret: string
 ): boolean {
   if (!payload || !signature || !secret) {
     return false;
   }
+
+  const signatures = Array.isArray(signature) ? signature : [signature];
 
   try {
     const hash = crypto
@@ -23,10 +25,13 @@ export function verifyWebhookSignature(
       .digest('base64');
     
     // Use timing-safe comparison to prevent timing attacks
-    return crypto.timingSafeEqual(
-      Buffer.from(hash),
-      Buffer.from(signature)
-    );
+    for (const sig of signatures) {
+      if (crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(sig))) {
+        return true;
+      }
+    }
+
+    return false;
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
     return false;

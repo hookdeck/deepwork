@@ -12,9 +12,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Use mock if Hookdeck API key is not configured or is a placeholder
+    // Use mock if Hookdeck API key is not configured or mock mode is enabled
     const hookdeckApiKey = process.env.HOOKDECK_API_KEY;
-    const useMock = !hookdeckApiKey || hookdeckApiKey.startsWith('hk_dev_');
+    const useMock = !hookdeckApiKey || process.env.USE_MOCK_HOOKDECK === 'true';
     
     // Try to initialize Hookdeck connections
     const connections = useMock 
@@ -54,9 +54,9 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Use mock if Hookdeck API key is not configured
+    // Use mock if Hookdeck API key is not configured or mock mode is enabled
     const hookdeckApiKey = process.env.HOOKDECK_API_KEY;
-    const useMock = !hookdeckApiKey || hookdeckApiKey.startsWith('hk_dev_');
+    const useMock = !hookdeckApiKey || process.env.USE_MOCK_HOOKDECK === 'true';
     
     // Clear the connections
     if (useMock) {

@@ -1,7 +1,8 @@
 export interface Research {
   id: string;
   question: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'incomplete';
+  progress?: number;
   result?: string;
   error?: string;
   createdAt: string;

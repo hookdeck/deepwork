@@ -20,16 +20,16 @@ export default function Navigation() {
           {session && (
             <>
               <Link 
-                href="/test-research" 
-                className={`hover:text-gray-300 ${isActive('/test-research') ? 'text-blue-400' : ''}`}
+                href="/research" 
+                className={`hover:text-gray-300 ${isActive('/research') ? 'text-blue-400' : ''}`}
               >
                 Research
               </Link>
-              <Link 
-                href="/test-hookdeck" 
-                className={`hover:text-gray-300 ${isActive('/test-hookdeck') ? 'text-blue-400' : ''}`}
+              <Link
+                href="/events"
+                className={`hover:text-gray-300 ${isActive('/events') ? 'text-blue-400' : ''}`}
               >
-                Test Hookdeck
+                Events
               </Link>
             </>
           )}

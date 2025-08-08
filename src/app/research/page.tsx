@@ -69,8 +69,6 @@ export default function TestResearchPage() {
       setResearches([newResearch, ...researches]);
       setQuestion('');
       
-      // Simulate webhook after 2 seconds
-      setTimeout(() => simulateWebhook(newResearch.id), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -78,26 +76,6 @@ export default function TestResearchPage() {
     }
   };
 
-  const simulateWebhook = async (researchId: string) => {
-    try {
-      const response = await fetch('/api/test/research-workflow', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'simulate-webhook',
-          researchId,
-        }),
-      });
-
-      if (response.ok) {
-        fetchResearches(); // Refresh the list
-      }
-    } catch (err) {
-      console.error('Error simulating webhook:', err);
-    }
-  };
 
   if (status === 'loading') {
     return <div>Loading...</div>;
@@ -153,7 +131,12 @@ export default function TestResearchPage() {
                 </span>
               </div>
               {research.result && (
-                <p className="text-muted mt-2">{research.result}</p>
+                <div>
+                  <h4 className="font-medium mt-4">Result:</h4>
+                  <pre className="text-muted mt-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto">
+                    {JSON.stringify(JSON.parse(research.result), null, 2)}
+                  </pre>
+                </div>
               )}
               {research.error && (
                 <p className="text-danger mt-2">Error: {research.error}</p>

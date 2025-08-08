@@ -157,9 +157,7 @@ export async function ensureHookdeckConnections() {
         url: `${process.env.NEXTAUTH_URL}/api/webhooks/openai`,
         auth_method: {
           type: 'HOOKDECK_SIGNATURE',
-          config: {
-            webhook_secret_key: process.env.HOOKDECK_WEBHOOK_SECRET!
-          }
+          config: {}
         }
       }
     })
@@ -408,7 +406,7 @@ export async function POST(request: Request) {
   const signature = request.headers.get('x-hookdeck-signature');
   const rawBody = await request.text();
   
-  if (!verifyWebhookSignature(rawBody, signature!, process.env.HOOKDECK_WEBHOOK_SECRET!)) {
+  if (!verifyWebhookSignature(rawBody, signature!, process.env.HOOKDECK_SIGNING_SECRET!)) {
     return new Response('Unauthorized', { status: 401 });
   }
   

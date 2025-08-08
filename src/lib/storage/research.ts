@@ -1,26 +1,18 @@
 import { Research } from '@/types/research';
-
-// In-memory storage for development
-// In production, this would be replaced with a database
-const researchStore = new Map<string, Research>();
+import { fileKv } from './file-kv';
 
 export const researchStorage = {
   async save(research: Research): Promise<void> {
-    researchStore.set(`research:${research.id}`, research);
+    fileKv.set(`research:${research.id}`, research);
   },
 
   async get(id: string): Promise<Research | null> {
-    return researchStore.get(`research:${id}`) || null;
+    return fileKv.get<Research>(`research:${id}`);
   },
 
   async list(): Promise<Research[]> {
-    const researches: Research[] = [];
-    for (const [key, value] of researchStore.entries()) {
-      if (key.startsWith('research:')) {
-        researches.push(value);
-      }
-    }
-    return researches.sort((a, b) => 
+    const researches = fileKv.list<Research>().filter(r => r.id);
+    return researches.sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   },

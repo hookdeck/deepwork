@@ -65,6 +65,7 @@ export interface StoredConnections {
   };
   webhook: {
     id: string;
+    sourceId: string;
     sourceUrl: string;
   };
 }
