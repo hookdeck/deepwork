@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import crypto from "crypto";
+import { execSync } from "child_process";
 import {
   ensureHookdeckConnections,
   updateWebhookSource,
@@ -192,6 +193,26 @@ async function main() {
     hookdeckApiKey
   );
   console.log("✅ Hookdeck source updated");
+
+  console.log("\n5. Set up the Hookdeck CLI for local development");
+
+  console.log("   Running Hookdeck login...");
+
+  try {
+    console.log("   Please authenticate in the browser window that opens:");
+    execSync("npm run hookdeck -- login", { stdio: "inherit" });
+    console.log("✅ Successfully logged in to Hookdeck");
+
+    console.log("\n   Select a Hookdeck project to use:");
+    execSync("npm run hookdeck -- project use", { stdio: "inherit" });
+    console.log("✅ Hookdeck project selected");
+  } catch (error: any) {
+    console.error("❌ Error setting up Hookdeck CLI:", error.message);
+    console.log("   Please install the Hookdeck CLI manually:");
+    console.log("   npm install -g @hookdeck/cli");
+    console.log("   hookdeck login");
+    console.log("   hookdeck project use");
+  }
 
   console.log("\n📋 Next Steps:\n");
   console.log("1. Start the development server in a separate terminal:");

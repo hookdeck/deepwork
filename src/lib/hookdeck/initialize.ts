@@ -37,10 +37,6 @@ function log(level: string, message: string, ...args: any[]) {
   }
 }
 
-// Simple in-memory storage for development when Vercel KV is not available
-
-// KV-like interface for development
-
 /**
  * Generates secure basic auth credentials for Source A
  */
@@ -107,6 +103,40 @@ async function createHookdeckConnection(
   }
 }
 
+async function pauseHookdeckConnection(connectionId: string, apiKey: string) {
+  const url = `${HOOKDECK_API_URL}/connections/${connectionId}/pause`;
+  log("debug", `Pausing Hookdeck connection: ${connectionId}`);
+
+  try {
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      let errorMessage = `Failed to pause Hookdeck connection: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorData.error || errorMessage;
+        log("error", "Hookdeck API error:", errorData);
+      } catch {
+        errorMessage += ` - ${responseText}`;
+      }
+      log("error", errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    log("info", `Successfully paused connection: ${connectionId}`);
+  } catch (error) {
+    log("error", `Error pausing connection ${connectionId}:`, error);
+    throw error;
+  }
+}
+
 /**
  * Ensures that Hookdeck connections exist for the DeepWork application.
  * Creates connections if they don't exist, otherwise returns existing ones.
@@ -144,7 +174,7 @@ export async function ensureHookdeckConnections(
       {
         name: "openai-queue",
         source: {
-          name: "deepwork-source",
+          name: "deepwork-jobs",
           allowed_http_methods: ["POST"],
           custom_response: {
             content_type: "application/json",
@@ -187,6 +217,8 @@ export async function ensureHookdeckConnections(
       },
       apiKey
     );
+
+    await pauseHookdeckConnection(webhookConnection.id, apiKey);
 
     // Store connection details in KV
     const connectionData: StoredConnections = {
