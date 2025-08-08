@@ -11,14 +11,6 @@ export async function getCorrelatedEvents(
   researchId: string,
   openaiRequestId: string | undefined
 ): Promise<EventTimeline[]> {
-  // If no API key is configured, return mock data for testing
-  if (
-    !process.env.HOOKDECK_API_KEY ||
-    process.env.HOOKDECK_API_KEY === "test-key"
-  ) {
-    return getMockEvents(researchId);
-  }
-
   const connections = await getHookdeckConnections();
 
   try {
@@ -117,40 +109,4 @@ export async function getCorrelatedEvents(
     console.error("Error fetching events from Hookdeck:", error);
     throw error;
   }
-}
-
-/**
- * Returns mock events for testing purposes
- */
-function getMockEvents(researchId: string): EventTimeline[] {
-  const now = new Date();
-  const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-  const threeMinutesAgo = new Date(now.getTime() - 3 * 60 * 1000);
-
-  return [
-    {
-      id: "evt_mock_1",
-      type: "outbound",
-      connection: "openai-queue",
-      status: "SUCCESS",
-      timestamp: fiveMinutesAgo.toISOString(),
-      data: {
-        research_id: researchId,
-        question: "Sample research question",
-        sent_to: "OpenAI Deep Research",
-      },
-    },
-    {
-      id: "evt_mock_2",
-      type: "inbound",
-      connection: "openai-webhook",
-      status: "SUCCESS",
-      timestamp: threeMinutesAgo.toISOString(),
-      data: {
-        research_id: researchId,
-        status: "processing",
-        progress: 50,
-      },
-    },
-  ];
 }

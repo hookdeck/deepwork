@@ -17,26 +17,7 @@ export default function Navigation() {
           <Link href="/" className="text-xl font-bold">
             DeepWork
           </Link>
-          {session && (
-            <>
-              <Link
-                href="/research"
-                className={`hover:text-gray-300 ${
-                  isActive("/research") ? "text-blue-400" : ""
-                }`}
-              >
-                Research
-              </Link>
-              <Link
-                href="/events"
-                className={`hover:text-gray-300 ${
-                  isActive("/events") ? "text-blue-400" : ""
-                }`}
-              >
-                Events
-              </Link>
-            </>
-          )}
+          {session && <></>}
         </div>
         <div>
           {session ? (
