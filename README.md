@@ -1,14 +1,14 @@
-# DeepWork: OpenAI Deep Research + Hookdeck
+# DeepWork: OpenAI Deep Research + Hookdeck Event Gateway
 
-DeepWork is a web application that demonstrates the power of combining OpenAI's Deep Research API with the Hookdeck Event Gateway to support highly reliable and scalable asynchronous workflows and background jobs.
+DeepWork is a web application that demonstrates the power of combining [OpenAI's Deep Research](https://platform.openai.com/docs/guides/deep-research) API with the [Hookdeck Event Gateway](https://hookdeck.com/event-gateway) to support highly reliable and scalable asynchronous workflows and background jobs.
 
 The application enables users to submit complex research questions to OpenAI's Deep Research service, which runs asynchronously in the background. Hookdeck manages both the outbound API requests (via queue) and inbound webhook responses, providing complete visibility into the entire research workflow.
 
 ## Features
 
 - **Asynchronous Research**: Submit long-running research tasks to OpenAI without blocking the UI.
-- **Reliable Webhooks**: Hookdeck ensures reliable delivery of OpenAI's webhook responses.
 - **Request Queuing**: Outbound requests to OpenAI are queued through Hookdeck for resilience and visibility.
+- **Reliable Webhooks**: Hookdeck ensures reliable delivery of OpenAI's webhook responses.
 - **Event Timeline**: View a detailed timeline of both outbound requests and inbound webhooks for each research task.
 - **Simple Authentication**: A straightforward demo authentication system using NextAuth.js.
 - **Serverless-first**: Built with Next.js and designed for deployment on Vercel.
