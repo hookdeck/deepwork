@@ -1,6 +1,6 @@
-# Deep Queue Local Development Guide
+# DeepWork Local Development Guide
 
-This guide will help you set up and run the Deep Queue application locally with real Hookdeck and OpenAI APIs before deployment to Vercel.
+This guide will help you set up and run the DeepWork application locally with real Hookdeck and OpenAI APIs before deployment to Vercel.
 
 ## Table of Contents
 
@@ -37,6 +37,7 @@ npm run setup:dev
 ```
 
 This will:
+
 - Generate secure secrets
 - Prompt for your API keys
 - Configure the environment file
@@ -106,6 +107,7 @@ This runs: `hookdeck listen 3000 openai-webhook --path /api/webhooks/openai`
 **Important**: The source name `openai-webhook` must match what's configured in the application.
 
 The CLI will display:
+
 - The webhook URL to configure in OpenAI (e.g., `https://hkdk.events/YOUR_SOURCE_URL`)
 - Real-time webhook events as they arrive
 - Request/response details for debugging
@@ -134,6 +136,7 @@ After running the setup script, you can proceed with the following steps to test
 1. Navigate to http://localhost:3000
 
 2. Create a new research request:
+
    - Enter a research topic
    - Submit the form
 
@@ -161,9 +164,11 @@ You can work with webhooks in two ways:
 1. Ensure Hookdeck CLI is running (see setup above)
 
 2. Send a dev webhook using Hookdeck Dashboard:
+
    - Go to your `openai-webhook` connection
    - Click "Send Test Event"
    - Use this dev payload:
+
    ```json
    {
      "id": "dev-completion-123",
@@ -171,11 +176,13 @@ You can work with webhooks in two ways:
      "metadata": {
        "researchId": "YOUR_RESEARCH_ID"
      },
-     "choices": [{
-       "message": {
-         "content": "This is a development research result"
+     "choices": [
+       {
+         "message": {
+           "content": "This is a development research result"
+         }
        }
-     }]
+     ]
    }
    ```
 
@@ -186,15 +193,17 @@ You can work with webhooks in two ways:
 
 ### Step 5: Verify Basic Auth Filter
 
-The Deep Queue source uses basic auth to prevent unauthorized requests.
+The DeepWork source uses basic auth to prevent unauthorized requests.
 
 1. Get the auth credentials:
+
    ```bash
    # Check the dev endpoint response for auth details
    curl http://localhost:3000/api/test/hookdeck-init
    ```
 
 2. Verify with valid auth:
+
    ```bash
    curl -X POST https://hkdk.events/YOUR_SOURCE_URL \
      -H "Authorization: Basic YOUR_ENCODED_CREDENTIALS" \
@@ -215,6 +224,7 @@ The Deep Queue source uses basic auth to prevent unauthorized requests.
 ### Issue: "HOOKDECK_API_KEY not configured"
 
 **Solution**: Ensure your `.env.local` file contains a valid Hookdeck API key:
+
 ```env
 HOOKDECK_API_KEY=your-hookdeck-api-key
 ```
@@ -222,6 +232,7 @@ HOOKDECK_API_KEY=your-hookdeck-api-key
 ### Issue: Webhooks not received locally
 
 **Solutions**:
+
 1. Verify Hookdeck CLI is running: `npm run hookdeck:listen`
 2. Check the source name matches exactly: `openai-webhook`
 3. Ensure your local server is running on port 3000
@@ -230,6 +241,7 @@ HOOKDECK_API_KEY=your-hookdeck-api-key
 ### Issue: "Invalid webhook signature"
 
 **Solutions**:
+
 1. Verify `HOOKDECK_SIGNING_SECRET` matches your Hookdeck configuration
 2. Check that the webhook payload hasn't been modified
 3. For development, temporarily set `NODE_ENV=development` to skip verification
@@ -237,6 +249,7 @@ HOOKDECK_API_KEY=your-hookdeck-api-key
 ### Issue: Research stuck in "processing"
 
 **Debugging steps**:
+
 1. Check Hookdeck Dashboard for failed events
 2. View browser console for API errors
 3. Check server logs: `npm run dev`
@@ -245,6 +258,7 @@ HOOKDECK_API_KEY=your-hookdeck-api-key
 ### Issue: Mock mode still active
 
 **Solutions**:
+
 1. Ensure `HOOKDECK_API_KEY` is set to your actual API key and `USE_MOCK_HOOKDECK=false`
 2. Clear any cached connections:
    ```bash
@@ -262,6 +276,7 @@ curl http://localhost:3000/api/test/complete-workflow \
 ```
 
 This will verify:
+
 - Environment configuration
 - Hookdeck setup and connections
 - Complete research workflow
@@ -285,6 +300,7 @@ Before deploying to production, ensure:
 ### Enable Verbose Logging
 
 Add to your `.env.local`:
+
 ```env
 DEBUG=true
 LOG_LEVEL=verbose
@@ -293,6 +309,7 @@ LOG_LEVEL=verbose
 ### Monitor Network Traffic
 
 Use browser DevTools Network tab to inspect:
+
 - API requests to `/api/researches`
 - Webhook payloads
 - Response headers and status codes
@@ -300,6 +317,7 @@ Use browser DevTools Network tab to inspect:
 ### Check Hookdeck Events
 
 In Hookdeck Dashboard:
+
 1. Go to Events tab
 2. Filter by connection
 3. View request/response details
@@ -308,6 +326,7 @@ In Hookdeck Dashboard:
 ### Verify Individual Components
 
 Use the provided development endpoints:
+
 - `/api/test/hookdeck-init` - Verify Hookdeck initialization
 - `/api/test/research-workflow` - Verify research workflow
 - `/test-hookdeck` - UI for connection verification

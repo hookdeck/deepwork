@@ -45,7 +45,7 @@ function log(level: string, message: string, ...args: any[]) {
  * Generates secure basic auth credentials for Source A
  */
 function generateBasicAuth(): BasicAuthCredentials {
-  const username = "deepqueue";
+  const username = "deepwork";
   const password = crypto.randomBytes(32).toString("base64");
   const encoded = Buffer.from(`${username}:${password}`).toString("base64");
 
@@ -108,7 +108,7 @@ async function createHookdeckConnection(
 }
 
 /**
- * Ensures that Hookdeck connections exist for the Deep Queue application.
+ * Ensures that Hookdeck connections exist for the DeepWork application.
  * Creates connections if they don't exist, otherwise returns existing ones.
  */
 export async function ensureHookdeckConnections(
@@ -144,7 +144,7 @@ export async function ensureHookdeckConnections(
       {
         name: "openai-queue",
         source: {
-          name: "deepqueue-source",
+          name: "deepwork-source",
           allowed_http_methods: ["POST"],
           custom_response: {
             content_type: "application/json",
@@ -177,7 +177,7 @@ export async function ensureHookdeckConnections(
           },
         },
         destination: {
-          name: "deepqueue-webhook",
+          name: "deepwork-webhook",
           config: {
             url: `${appUrl}/api/webhooks/openai`,
             auth_type: "HOOKDECK_SIGNATURE",

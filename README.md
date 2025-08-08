@@ -20,21 +20,24 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Developing Deep Queue
+## Developing DeepWork
 
 ### Quick Start Development
 
 1. **Setup your environment:**
+
    ```bash
    npm run setup:dev
    ```
 
 2. **Start the development server:**
+
    ```bash
    npm run dev
    ```
 
 3. **Verify Hookdeck integration:**
+
    - Visit: http://localhost:3000/test-hookdeck
    - Or run: `npm run dev:hookdeck`
 

@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Deep Queue - OpenAI Deep Research + Hookdeck",
-  description: "Demonstrate the power of combining OpenAI's Deep Research API with Hookdeck's webhook infrastructure",
+  title: "DeepWork - OpenAI Deep Research + Hookdeck",
+  description:
+    "Demonstrate the power of combining OpenAI's Deep Research API with Hookdeck's webhook infrastructure",
 };
-
 
 export default function RootLayout({
   children,
@@ -33,9 +33,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navigation />
           <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="container mx-auto px-4 py-8">
-              {children}
-            </div>
+            <div className="container mx-auto px-4 py-8">{children}</div>
           </main>
         </AuthProvider>
       </body>

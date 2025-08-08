@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const { data: session } = useSession();
@@ -15,19 +15,23 @@ export default function Navigation() {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-6">
           <Link href="/" className="text-xl font-bold">
-            Deep Queue
+            DeepWork
           </Link>
           {session && (
             <>
-              <Link 
-                href="/research" 
-                className={`hover:text-gray-300 ${isActive('/research') ? 'text-blue-400' : ''}`}
+              <Link
+                href="/research"
+                className={`hover:text-gray-300 ${
+                  isActive("/research") ? "text-blue-400" : ""
+                }`}
               >
                 Research
               </Link>
               <Link
                 href="/events"
-                className={`hover:text-gray-300 ${isActive('/events') ? 'text-blue-400' : ''}`}
+                className={`hover:text-gray-300 ${
+                  isActive("/events") ? "text-blue-400" : ""
+                }`}
               >
                 Events
               </Link>
@@ -46,8 +50,8 @@ export default function Navigation() {
               </button>
             </div>
           ) : (
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
             >
               Sign In

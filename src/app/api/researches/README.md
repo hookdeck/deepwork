@@ -1,13 +1,15 @@
 # Research Workflow API
 
-This directory contains the API routes for the Deep Queue research workflow.
+This directory contains the API routes for the DeepWork research workflow.
 
 ## Endpoints
 
 ### POST /api/researches
+
 Submit a new research question.
 
 **Request Body:**
+
 ```json
 {
   "question": "What is the capital of France?"
@@ -15,6 +17,7 @@ Submit a new research question.
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -27,9 +30,11 @@ Submit a new research question.
 ```
 
 ### GET /api/researches
+
 List all research requests.
 
 **Response:**
+
 ```json
 {
   "researches": [
@@ -46,9 +51,11 @@ List all research requests.
 ```
 
 ### GET /api/researches/[id]
+
 Get details of a specific research request.
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -64,9 +71,11 @@ Get details of a specific research request.
 ## Webhook Handler
 
 ### POST /api/webhooks/openai
+
 Handles webhook events from OpenAI (via Hookdeck).
 
 The webhook handler:
+
 1. Verifies the webhook signature
 2. Extracts the research ID from the payload
 3. Updates the research record with the result or error
