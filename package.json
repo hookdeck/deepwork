@@ -10,6 +10,7 @@
     "setup:dev": "ts-node scripts/setup-dev.ts",
     "hookdeck": "hookdeck",
     "hookdeck:login": "hookdeck login",
+    "hookdeck:project-select": "hookdeck project use",
     "hookdeck:listen": "hookdeck listen 3000 openai-webhook --path /api/webhooks/openai"
   },
   "dependencies": {
@@ -28,7 +29,7 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "hookdeck-cli": "^1.0",
+    "hookdeck-cli": "^1.0.2",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"

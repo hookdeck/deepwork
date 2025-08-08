@@ -196,15 +196,12 @@ async function main() {
 
   console.log("\n5. Set up the Hookdeck CLI for local development");
 
-  console.log("   Running Hookdeck login...");
-
   try {
-    console.log("   Please authenticate in the browser window that opens:");
-    execSync("npm run hookdeck -- login", { stdio: "inherit" });
-    console.log("✅ Successfully logged in to Hookdeck");
-
     console.log("\n   Select a Hookdeck project to use:");
-    execSync("npm run hookdeck -- project use", { stdio: "inherit" });
+    console.log(
+      "   Note: you may be prompted to authenticate via the browser."
+    );
+    execSync("npm run hookdeck:project-select", { stdio: "inherit" });
     console.log("✅ Hookdeck project selected");
   } catch (error: any) {
     console.error("❌ Error setting up Hookdeck CLI:", error.message);

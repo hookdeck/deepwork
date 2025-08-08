@@ -202,6 +202,7 @@ export async function ensureHookdeckConnections(
         name: "openai-webhook",
         source: {
           name: "openai-webhook",
+          type: "OPENAI",
           config: {
             allowed_http_methods: ["POST"],
           },
@@ -273,9 +274,11 @@ export async function updateWebhookSource(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      auth_type: "OPENAI",
-      auth: {
-        webhook_secret_key: secret,
+      type: "OPENAI",
+      config: {
+        auth: {
+          webhook_secret_key: secret,
+        },
       },
     }),
   });
