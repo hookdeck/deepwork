@@ -100,6 +100,9 @@ async function main() {
     "You need a Hookdeck account to handle webhook queuing and routing."
   );
   console.log("Sign up at: https://hookdeck.com\n");
+  console.log(
+    "Project credentials available at: https://dashboard.hookdeck.com/settings/project/secrets\n"
+  );
 
   const hookdeckApiKey = await question("Enter your Hookdeck API key: ");
   if (!hookdeckApiKey.trim()) {
@@ -124,9 +127,7 @@ async function main() {
     hookdeckSigningSecret
   );
 
-  // Enable real API mode when API key is provided
-  envContent = replaceEnvVar(envContent, "USE_MOCK_HOOKDECK", "false");
-  console.log("✅ Configured Hookdeck credentials and enabled real API mode");
+  console.log("✅ Configured Hookdeck credentials");
 
   // OpenAI (REQUIRED)
   console.log("\n🤖 OpenAI Configuration (REQUIRED)\n");
