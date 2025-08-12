@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import crypto from "crypto";
-import { execSync } from "child_process";
 import {
   ensureHookdeckConnections,
   updateWebhookSource,
@@ -196,20 +195,13 @@ async function main() {
 
   console.log("\n5. Set up the Hookdeck CLI for local development");
 
-  try {
-    console.log("\n   Select a Hookdeck project to use:");
-    console.log(
-      "   Note: you may be prompted to authenticate via the browser."
-    );
-    execSync("npm run hookdeck:project-select", { stdio: "inherit" });
-    console.log("✅ Hookdeck project selected");
-  } catch (error: any) {
-    console.error("❌ Error setting up Hookdeck CLI:", error.message);
-    console.log("   Please install the Hookdeck CLI manually:");
-    console.log("   npm install -g @hookdeck/cli");
-    console.log("   hookdeck login");
-    console.log("   hookdeck project use");
-  }
+  console.log(
+    "   You will now need to run the following commands in a separate terminal:"
+  );
+  console.log("   \x1b[32mnpm run hookdeck:login\x1b[0m");
+  console.log("   \x1b[32mnpm run hookdeck:project-select\x1b[0m");
+
+  await question("\nPress Enter when you have completed these steps...");
 
   console.log("\n📋 Next Steps:\n");
   console.log("1. Start the development server in a separate terminal:");
@@ -225,7 +217,6 @@ async function main() {
   console.log("5. Submit a research topic to test the end-to-end flow.\n");
 
   console.log("For detailed instructions, see DEVELOPMENT.md");
-
   rl.close();
 }
 
